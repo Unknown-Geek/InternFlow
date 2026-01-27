@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.2,
       "position": [
-        0,
-        560
+        -2528,
+        176
       ],
-      "id": "7764773e-6fcd-46ab-bb44-7b670fbdaac1",
+      "id": "cf124f0f-772f-4752-9aee-24ce1bde2c9d",
       "name": "Telegram Trigger",
       "webhookId": "de03b2ad-85a1-463a-9a1a-6e3c307de84a",
       "credentials": {
@@ -23,20 +23,6 @@
           "name": "Internships Bot"
         }
       }
-    },
-    {
-      "parameters": {
-        "jsonSchemaExample": "{\n  \"send_whatsapp\": true,\n  \"reason\": \"Internship matches eligibility and role criteria.\",\n  \"whatsapp_message\": \"💼 *Software Engineer Intern (2025–2027)*\\\\nCompany: Google\\\\nLocation: Bangalore\\\\nEligibility: 2027 graduates\\\\nApply here: https://careers.google.com/internships\"\n}",
-        "autoFix": true
-      },
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [
-        1488,
-        784
-      ],
-      "id": "48b41b33-8ca3-4465-8c8d-817350c5d1de",
-      "name": "Structured Output Parser"
     },
     {
       "parameters": {
@@ -50,11 +36,21 @@
           "conditions": [
             {
               "id": "7c4709a1-e1dd-4021-99f2-f636a049bedd",
-              "leftValue": "={{ $json.output.send_whatsapp }}",
+              "leftValue": "={{ $('Output Parser').item.json.send_whatsapp }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
                 "operation": "equals"
+              }
+            },
+            {
+              "id": "9fd508d8-b394-442c-9dca-f730575edb3e",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
               }
             }
           ],
@@ -65,10 +61,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1856,
-        560
+        -192,
+        176
       ],
-      "id": "c231d8eb-34ed-4bb1-abd2-31c075c613f6",
+      "id": "167b29fd-31a1-41d6-a53f-7dacccc5a8b8",
       "name": "If",
       "retryOnFail": true
     },
@@ -142,105 +138,37 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        2528,
-        416
+        704,
+        -64
       ],
-      "id": "9d484794-9252-4087-be1d-a64e2ef2d3ce",
+      "id": "a03dfaa3-6e5d-415e-8c9e-c1eb0148d00e",
       "name": "Insert row",
       "retryOnFail": true,
       "waitBetweenTries": 3000,
-      "executeOnce": true
-    },
-    {
-      "parameters": {
-        "descriptionType": "manual",
-        "toolDescription": "ALWAYS use this tool first. Input the internship title or application URL found in the message. This tool checks if the internship has already been sent to WhatsApp to prevent duplicates. If this tool returns a match, do not process further.",
-        "operation": "get",
-        "dataTableId": {
-          "__rl": true,
-          "value": "yOfWQK9CB3soT3Ai",
-          "mode": "list",
-          "cachedResultName": "Internship Alerts",
-          "cachedResultUrl": "/projects/0aENaaiAf9dL9Hyo/datatables/yOfWQK9CB3soT3Ai"
-        },
-        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
-      },
-      "type": "n8n-nodes-base.dataTableTool",
-      "typeVersion": 1,
-      "position": [
-        1104,
-        784
-      ],
-      "id": "6fe25313-8018-44fb-b726-5d346985f0ff",
-      "name": "check_database_for_duplicates"
-    },
-    {
-      "parameters": {
-        "toolDescription": "Use this tool ONLY if the message contains a URL but lacks specific details (like '2027 batch' or 'eligibility') OR to verify if an application is expired. It returns the text content of the webpage. Input must be a valid URL string starting with http/https.",
-        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.3,
-      "position": [
-        1232,
-        784
-      ],
-      "id": "97f12ebe-cbbe-47de-a73e-4b3ccdb37115",
-      "name": "scrape_application_page"
-    },
-    {
-      "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-2.5-flash-lite",
-          "mode": "list",
-          "cachedResultName": "models/gemini-2.5-flash-lite"
-        },
-        "messages": {
-          "values": [
-            {
-              "content": "=You are a data extraction parser. Your task is to extract specific details from the internship summary text below and return them as a strict JSON object.\n\n**Input Text**\n{{ $('If').item.json.output.whatsapp_message }}\n\n**Extraction Rules:**\n1. **Clean the Data:** Remove all emojis (like 💼, 💡) and Markdown symbols (like *) from the values.\n2. **Title:** Extract the role title (e.g., \"Software Engineer Intern\").\n3. **Company:** Extract the company name.\n4. **Eligibility:** Extract the batch/year requirement.\n5. **Link:** Extract the direct application URL.\n\n**Output Format:**\nReturn ONLY raw JSON. Do not use Markdown code blocks (no ```json).\n\n{\n  \"title\": \"Clean Title Here\",\n  \"company_name\": \"Clean Company Name Here\",\n  \"eligibility\": \"Clean Eligibility Here\",\n  \"link\": \"https://...\"\n}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "6b130e2d-af6a-4b4c-ac28-03d5d115fd45",
-      "name": "Message a model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "DoPP6uNz8ZGXDeHX",
-          "name": "API KEY 1"
-        }
-      }
+      "executeOnce": true,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Process the following job opportunity data and extract the structured output.\n\n**INPUT DATA:**\nTitle: {{ $json.role }}\nCompany: {{ $json.company }}\nStipend: {{ $json.stipend }}\nEligibility (Raw): {{ $json.eligibility }}\nLink: {{ $json.apply_link }}\n\n**VERIFICATION INSTRUCTION:**\n1. **Analyze Eligibility:** Check if the scraping result *explicitly* mentions \"2027\" or \"Pre-final\".\n2. **Ambiguity Trap:** If the scraped text is generic (e.g., just says \"Intern\" or \"B.Tech\" without a year), you **MUST** verify using `serpapi_search`.\n3. **Search Query:** `{{ $json.company }} {{ $json.role }} internship batch year requirements`\n\n**OUTPUT INSTRUCTIONS:**\n- Return ONLY the JSON object.\n- **Formatting Check:** Ensure `whatsapp_message` contains actual newlines (`\\n`) and NOT literal string characters (`\\\\n`).",
+        "text": "=Process the following job opportunity data and extract the structured output.\n\n**TASK:**\n1. Analyze the \"Cleaned HTML Text\" below to determine eligibility.\n2. IF the text is missing the Batch Year (e.g., just says \"Student\" or \"Intern\"), use `serpapi_search` to verify if it is for 2027 graduates.\n\n**INPUT DATA:**\nTitle: {{ $('JSON Format Fixer').item.json.role }}\nCompany: {{ $('JSON Format Fixer').item.json.company }}\nEligibilty : {{ $('JSON Format Fixer').item.json.eligibility }}\nStipend : {{ $('JSON Format Fixer').item.json.stipend }}\nLink: {{ $('JSON Format Fixer').item.json.apply_link }}\n\n**CLEANED HTML TEXT (SOURCE):**\n\"\"\"\n{{ $('HTML Cleaner').item.json.text }}\n\"\"\"\n\n**OUTPUT REQUIREMENTS:**\n- Verify strict eligibility for **Batch of 2027** (Pre-final year).\n- Return the final JSON using the \"Final Answer\" format defined in the system message.",
         "hasOutputParser": true,
         "needsFallback": true,
         "options": {
-          "systemMessage": "You are a backend JSON Data Processing Engine for a job notification service.\nYour ONLY function is to analyze job data and output a JSON response.\n\n**CORE OBJECTIVE:**\nIdentify valid internship opportunities for **Pre-final Year Students (Batch of 2027)**.\n\n**CORE FILTERS (STRICT):**\n1. **INTERNSHIPS ONLY:**\n   - ACCEPT: Titles containing \"Intern\", \"Internship\", \"Summer Analyst\".\n   - REJECT: \"Full-Time\", \"FTE\", \"Associate\", \"Trainee\" (unless \"Intern\" is also in title).\n   - **Override:** If Title contains \"Intern\", IGNORE any scraped metadata saying \"Full-Time\".\n\n2. **STUDENTS ONLY:**\n   - **If Title has \"Intern\":** ACCEPT \"0-1 years\" experience.\n   - **If Title is Generic:** REJECT if experience > 0 years.\n\n3. **2027 BATCH ELIGIBILITY (CRITICAL):**\n   - **Target:** June 2027 graduates (Current 3rd year).\n   - **Acceptable Keywords:** \"2027\", \"Pre-final\", \"Penultimate\", \"Pursuing Degree\" (if implies current student).\n   - **REJECT:** \"2026 Batch\", \"2025 Batch\", \"Immediate Joiner\", \"Graduates only\".\n\n**YOUR TOOLS:**\n1. `check_database_for_duplicates`: ALWAYS call this first.\n2. `scrape_application_page`: Primary tool (HTTP Request).\n3. `serpapi_search`: Fallback verification tool.\n\n**EXECUTION PROTOCOL:**\n\nSTEP 1: DUPLICATE CHECK\n- Extract `Application Link` and `Job Title`.\n- Call `check_database_for_duplicates`.\n- If match found -> STOP. Return `send_whatsapp: false`.\n\nSTEP 2: INITIAL FILTERING\n- Apply \"Core Filters\" to the provided raw text.\n- If text is ambiguous (e.g., \"Intern\" but no Batch listed) -> GO TO STEP 3.\n\nSTEP 3: TIERED VERIFICATION\n- **Attempt 1 (HTTP):** Call `scrape_application_page`.\n  - **Result Analysis:**\n    - Text contains \"2027\" OR \"Pre-final\" OR \"Penultimate\"? -> **MARK VALID**.\n    - Text contains \"2026\" OR \"2025\" OR \"Graduates only\"? -> **REJECT**.\n    - **Ambiguous Result:** If text only says \"Intern\" or \"Student\" but NO specific year -> **PROCEED TO ATTEMPT 2** (Do not assume valid).\n  - **If FAILED (403, 401, Empty):** Proceed to Attempt 2.\n\n- **Attempt 2 (Search Fallback):** Call `serpapi_search`.\n  - **Payload:** { \"q\": \"{Job Title} {Company} internship batch eligibility 2027\" }\n  - **Analysis:** Read the search snippets.\n    - If snippet confirms \"2027\" or \"Pre-final\" -> **MARK VALID**.\n    - If snippet says \"2026\", \"2025\", \"Graduates\" -> **REJECT**.\n    - If still ambiguous -> **REJECT** (Reason: \"Eligibility Unverifiable\").\n\nSTEP 4: FINAL JSON OUTPUT\n- **If Valid (`send_whatsapp: true`):**\n  - `whatsapp_message`: Follow the **STRICT TEMPLATE** below.\n  - `db_data`: Clean fields.\n- **If Invalid (`send_whatsapp: false`):**\n  - `reason`: Specific error (e.g., \"Confirmed 2026 batch via Search\").\n\n**WHATSAPP MESSAGE TEMPLATE (Strict Formatting):**\n1. Use `*Bold*` for keys. No spaces between asterisk and text.\n2. Use standard `\\n` for newlines. **DO NOT** use double backslash `\\\\n`.\n3. Format exactly like this:\n   `*New Internship Alert!*`\n   ` `\n   `*Title:* <Job Title>`\n   `*Company:* <Company Name>`\n   `*Eligibility:* <Short Batch Info>`\n   ` `\n   `*Apply Link:* <Link>`"
+          "systemMessage": "You are a backend JSON Data Processing Engine.\nYour ONLY function is to analyze job data and output a JSON response.\n\n**CORE OBJECTIVE:**\nIdentify valid **TECHNICAL** internship opportunities for **Pre-final Year Students (Batch of 2027)**.\n\n**STRICT DOMAIN FILTER (TECHNICAL ROLES ONLY):**\n- **ACCEPT:** Software, Engineering, Data Science, AI/ML, Cyber Security, Cloud, QA/Testing, Product Design (UI/UX), Technical Analyst, Research (R&D).\n- **IMMEDIATE REJECT:** Finance, Accounting, HR, Marketing, Sales, Business Development (BDE), Management Trainee, Operations, Content Writing, Social Media, Customer Support.\n- **NOTE:** \"Analyst\" roles must be carefully checked. \"Data Analyst\" = Valid. \"Financial Analyst\" = Invalid.\n\n**EXECUTION PROTOCOL (STRICT ORDER - DO NOT SKIP):**\n\n**STEP 1: MANDATORY DUPLICATE CHECK (BLOCKING)**\n- **Action:** You MUST call the tool `check_duplicate` first.\n- **Input:** Use the job link provided in the prompt.\n- **Logic:**\n  - If the tool returns `true` (or \"Duplicate\"): **STOP IMMEDIATELY.**\n  - **OUTPUT:** `{\"send_whatsapp\": false, \"reason\": \"Duplicate\"}`.\n  - **FORBIDDEN:** Do NOT proceed to Step 2. Do NOT use `serpapi_request`.\n\n**STEP 2: TEXT SCAN & DOMAIN FILTER**\n- *Only runs if Step 1 passed.*\n- Read the \"Cleaned HTML Text\".\n\n- **SUB-STEP 2.1: DOMAIN CHECK (Crucial)**\n  - Is this a non-technical role (e.g., Finance, HR, Sales)?\n  - -> **YES:** STOP. **INVALID**. (Reason: \"Non-technical role\").\n\n- **SUB-STEP 2.2: BATCH CHECK**\n  - **CHECK A:** Does it contain \"2027\"?\n    -> **YES:** STOP. **MARK VALID**. (Do NOT search).\n  - **CHECK B:** Does it contain \"Pre-final\" or \"Penultimate\"?\n    -> **YES:** STOP. **MARK VALID**. (Do NOT search).\n  - **CHECK C:** Does it contain ONLY \"2026\" or \"2025\" (and NO \"2027\")?\n    -> **YES:** STOP. **INVALID**. (Reason: \"2026 batch only\").\n\n**STEP 3: FALLBACK SEARCH (LAST RESORT)**\n- *Only runs if Step 2 was inconclusive regarding the BATCH YEAR.*\n- *Do NOT search if the role was already rejected as Non-Technical.*\n- **Action:** Call `serpapi_request`.\n- **Input Schema:** `{ \"query\": \"Company Role 2027 eligibility\" }`\n\n**WHATSAPP MESSAGE TEMPLATE:**\n   `*New Internship Alert!*`\n   ` `\n   `*Title:* <Job Title>`\n   `*Company:* <Company Name>`\n   `*Eligibility:* <Short Batch Info>`\n   ` `\n   `*Apply Link:* <Link>`\n\n**OUTPUT INSTRUCTION:**\nReturn ONLY the raw JSON object inside a code block.\nFinal Answer:\n```json\n{\n  \"send_whatsapp\": boolean,\n  \"reason\": \"...\",\n  \"whatsapp_message\": \"...\"\n}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        1072,
-        560
+        -1136,
+        176
       ],
-      "id": "d2ba591d-63f8-4c24-a9fc-04050550c003",
+      "id": "3494bbfb-67a5-4ec5-ab00-458e0aefc0ed",
       "name": "Analyst Agent",
       "retryOnFail": true,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 5000,
+      "maxTries": 5
     },
     {
       "parameters": {
@@ -255,12 +183,14 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        224,
-        560
+        -2304,
+        176
       ],
-      "id": "535a6201-66dc-48eb-acec-435ea3c78ff6",
+      "id": "26b09482-c232-412d-b764-64e31ab7ae3e",
       "name": "Splitter Agent",
-      "retryOnFail": true
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -269,44 +199,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        624,
-        560
+        -1904,
+        176
       ],
-      "id": "b8534dc0-d26d-4554-b20e-86457c00dd0b",
+      "id": "89f1be8a-b07f-4886-b78f-38b387948693",
       "name": "JSON Format Fixer"
-    },
-    {
-      "parameters": {
-        "jsCode": "// 1. Get the raw text string from the Gemini output\n// We try two common paths because Gemini node versions vary\nconst rawResponse = $input.item.json.content?.parts?.[0]?.text || \n                    $input.item.json.output || \n                    \"{}\";\n\n// 2. Clean up the text (Remove ```json and ``` if the AI added them)\nconst cleanJson = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();\n\n// 3. Parse the string into a real JSON object\nlet parsedData = {};\ntry {\n  parsedData = JSON.parse(cleanJson);\n} catch (error) {\n  // If parsing fails, return empty fields to prevent workflow crash\n  parsedData = {}; \n}\n\n// 4. Return the data as mappable fields\nreturn {\n  json: {\n    title: parsedData.title || \"Unknown Title\",\n    company_name: parsedData.company_name || parsedData.company || \"Unknown Company\",\n    eligibility: parsedData.eligibility || parsedData.eligibilty || \"Check Link\",\n    link: parsedData.link || \"\"\n  }\n};"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        352,
-        0
-      ],
-      "id": "94d818a6-521f-4a40-8220-0b7fef93a44d",
-      "name": "JSON Builder"
-    },
-    {
-      "parameters": {
-        "modelName": "models/gemini-2.0-flash-exp",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        1568,
-        992
-      ],
-      "id": "3859e2b1-c238-4f30-9336-8a677c3a7546",
-      "name": "Parser",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "DoPP6uNz8ZGXDeHX",
-          "name": "API KEY 1"
-        }
-      }
     },
     {
       "parameters": {
@@ -315,11 +212,12 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        2304,
-        464
+        256,
+        32
       ],
-      "id": "26ee98a1-84a0-47bf-b2ef-ff699e883c99",
-      "name": "Loop Over Items"
+      "id": "f0f1f97d-3220-416d-98f8-4e28bab9cb7e",
+      "name": "Loop Over Items",
+      "executeOnce": false
     },
     {
       "parameters": {
@@ -342,10 +240,10 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2080,
-        464
+        32,
+        32
       ],
-      "id": "acc10152-3f00-4da7-9e6d-1f34d657b1a2",
+      "id": "66f8bcbe-bc5b-4f60-8c98-3053ea093fdf",
       "name": "Get Mobile Numbers",
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -446,10 +344,10 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2528,
-        224
+        480,
+        -64
       ],
-      "id": "552120ee-8b73-45b3-86a5-88df3e6c7f6b",
+      "id": "362bd485-f75a-4e03-a381-8be79eae9826",
       "name": "Append Valid",
       "executeOnce": true,
       "retryOnFail": true,
@@ -481,9 +379,9 @@
           "mappingMode": "defineBelow",
           "value": {
             "Timestamp": "={{ $now }}",
-            "Rejection Reason": "={{ $json.output.reason }}",
-            "Application Link": "={{ $json.output.whatsapp_message }}",
-            "Telegram Message": "={{ $('Telegram Trigger').item.json.message.text }}"
+            "Rejection Reason": "={{ $('Output Parser').item.json.reason }}",
+            "Application Link": "={{ $('JSON Format Fixer').item.json.apply_link }}",
+            "Telegram Message": "={{ $('JSON Format Fixer').item.json.role }}\n{{ $('JSON Format Fixer').item.json.company }}\n{{ $('JSON Format Fixer').item.json.description }}\n{{ $('JSON Format Fixer').item.json.apply_link }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -536,11 +434,12 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2080,
-        656
+        32,
+        224
       ],
-      "id": "546aac9e-c74b-432c-a646-0868e65864d8",
+      "id": "6b6ed48c-9ea1-4547-8ce0-a7c6b5fa51be",
       "name": "Append Rejected",
+      "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "IlUP2Ct5qrErA6VN",
@@ -550,38 +449,19 @@
     },
     {
       "parameters": {
-        "options": {
-          "device": "desktop"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
-      "typeVersion": 1,
-      "position": [
-        1360,
-        784
-      ],
-      "id": "fc0627c2-4328-415d-9d22-110be32a9807",
-      "name": "serpapi_search",
-      "credentials": {
-        "serpApi": {
-          "id": "tmtUiplsSAZbrbkA",
-          "name": "SerpAPI account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "model": "meta-llama/llama-3.3-70b-instruct:free",
-        "options": {}
+        "options": {
+          "temperature": 0.1
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        256,
-        784
+        -1232,
+        400
       ],
-      "id": "458bcc79-f079-4a2c-b07c-070770eedacf",
-      "name": "Splitter Main",
+      "id": "7165ac30-41a5-4a04-9fa7-462062368fb6",
+      "name": "Analyst Main",
       "credentials": {
         "openRouterApi": {
           "id": "FVYZaHIKcsth7Wm5",
@@ -591,36 +471,73 @@
     },
     {
       "parameters": {
-        "model": "meta-llama/llama-3.3-70b-instruct:free",
+        "method": "POST",
+        "url": "http://140.245.29.28:3000/send",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "to",
+              "value": "=+{{ $json['Phone Number'] }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Output Parser').item.json.whatsapp_message }}"
+            }
+          ]
+        },
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
       "position": [
-        848,
-        784
+        480,
+        128
       ],
-      "id": "2456a3c8-fbe3-4de9-8bdb-5b5c296e20d8",
-      "name": "Analyst Main",
-      "credentials": {
-        "openRouterApi": {
-          "id": "7sj0qnSDuvJPaSMH",
-          "name": "API KEY 2"
-        }
-      }
+      "id": "e815c811-c9f3-416c-b929-9145eadf3752",
+      "name": "Send Whatsapp Message",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "toolDescription": "Performs a Google search to verify internship eligibility. Use this ONLY when the provided text is ambiguous or missing the batch year (e.g., '2027'). CRITICAL: You must provide a specific query string (e.g., 'Google Software Engineer Intern 2027 eligibility').",
+        "method": "POST",
+        "url": "https://n8n.shravanpandala.me/webhook/serpapi_search",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `The search query string (e.g. 'Company Role 2027 eligibility')`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        -976,
+        400
+      ],
+      "id": "a093e9d7-26fe-4ed7-ae55-63a253168ea1",
+      "name": "serpapi_request"
     },
     {
       "parameters": {
         "model": "llama-3.3-70b-versatile",
-        "options": {}
+        "options": {
+          "temperature": 0.1
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        976,
-        784
+        -1104,
+        400
       ],
-      "id": "6575097a-7540-45a9-8e14-4c0b7b1d53d8",
+      "id": "1e3917f8-87db-41cc-a4a9-e99e77e9c8f1",
       "name": "Analyst Fallback",
       "credentials": {
         "groqApi": {
@@ -631,53 +548,162 @@
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
-        "options": {}
+        "url": "={{ $json.apply_link }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "text"
+            }
+          }
+        }
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1680,
+        176
+      ],
+      "id": "1de8abd9-1dc7-4100-bc73-e4e18220d132",
+      "name": "Get HTML",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw content from the correct field ('text')\nlet rawContent = items[0].json.text;\n\n// 2. Safety Check: If input is missing or null\nif (!rawContent) {\n   return [{ json: { text: \"EMPTY_HTML_ERROR\" } }];\n}\n\n// 3. Handle the \"Redirect/JSON\" case (Your first screenshot)\n// If the content is a JSON string (starts with '{'), it is NOT valid HTML.\nif (typeof rawContent === 'string' && rawContent.trim().startsWith('{')) {\n   return [{ json: { text: \"EMPTY_HTML_ERROR\" } }];\n}\n\n// 4. Ensure input is a string for the Regex\nif (typeof rawContent !== 'string') {\n    // If it's somehow an object, stringify it or fail\n    try {\n        rawContent = JSON.stringify(rawContent);\n    } catch (e) {\n        return [{ json: { text: \"EMPTY_HTML_ERROR\" } }];\n    }\n}\n\n// 5. Cleaning Function\nfunction cleanText(html) {\n  if (!html) return \"\";\n  \n  // Remove <script> and <style> blocks entirely\n  let text = html.replace(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gm, \"\");\n  text = text.replace(/<style\\b[^>]*>([\\s\\S]*?)<\\/style>/gm, \"\");\n  \n  // Remove all HTML tags\n  text = text.replace(/<[^>]+>/g, \"\\n\");\n  \n  // Collapse multiple spaces/newlines into single spaces\n  text = text.replace(/\\s+/g, \" \").trim();\n  \n  return text;\n}\n\nconst clean = cleanText(rawContent);\n\n// 6. Final Check: If the cleaned text is too short, it's likely a bad scrape.\nif (clean.length < 20) {\n    return [{ json: { text: \"EMPTY_HTML_ERROR\" } }];\n}\n\n// 7. Success Output\nreturn [{ json: { text: clean } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1456,
+        176
+      ],
+      "id": "080fc5c4-91d9-4d96-bb69-61db3b0feb30",
+      "name": "HTML Cleaner",
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the raw text output from the Agent\n// (If your agent output field is named 'text', change 'output' to 'text' below)\nconst rawText = items[0].json.output || items[0].json.text;\n\n// 1. Try to find JSON inside markdown blocks ```json ... ```\nconst markdownMatch = rawText.match(/```json\\s*([\\s\\S]*?)\\s*```/);\n\n// 2. Try to find a raw JSON object { ... }\nconst rawMatch = rawText.match(/\\{[\\s\\S]*\\}/);\n\nlet finalJson = {};\n\ntry {\n  if (markdownMatch) {\n    finalJson = JSON.parse(markdownMatch[1]);\n  } else if (rawMatch) {\n    finalJson = JSON.parse(rawMatch[0]);\n  } else {\n    // If no JSON found, return a safe failure object\n    finalJson = { \n      send_whatsapp: false, \n      reason: \"Agent failed to output valid JSON\", \n      raw_output: rawText \n    };\n  }\n} catch (error) {\n  finalJson = { \n    send_whatsapp: false, \n    reason: \"JSON Parsing Failed\", \n    error_details: error.message \n  };\n}\n\nreturn [{ json: finalJson }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        176
+      ],
+      "id": "d9f6e102-ca91-4ac2-9594-81c79819c162",
+      "name": "Output Parser"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "CRITICAL: \nCall this FIRST. Checks if the job link is already in the database. If it returns any valid item as output , you must STOP immediately and return send_whatsapp: false.",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "yOfWQK9CB3soT3Ai",
+          "mode": "list",
+          "cachedResultName": "Internship Alerts",
+          "cachedResultUrl": "/projects/0aENaaiAf9dL9Hyo/datatables/yOfWQK9CB3soT3Ai"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Application_Link",
+              "keyValue": "={{ $('JSON Format Fixer').item.json.apply_link }}"
+            }
+          ]
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        -848,
+        400
+      ],
+      "id": "e1bf1edb-a946-4914-af46-510185ab3c54",
+      "name": "check_duplicate"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "yOfWQK9CB3soT3Ai",
+          "mode": "list",
+          "cachedResultName": "Internship Alerts",
+          "cachedResultUrl": "/projects/0aENaaiAf9dL9Hyo/datatables/yOfWQK9CB3soT3Ai"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Application_Link",
+              "keyValue": "={{ $('JSON Format Fixer').item.json.apply_link }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -416,
+        176
+      ],
+      "id": "18e77573-8fa3-4abc-a25b-1a07765814d7",
+      "name": "Check for duplicate valid",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.3-70b-instruct:free",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        384,
-        784
+        -2144,
+        400
       ],
-      "id": "3a637c8a-3438-4c68-a7e8-d3a2332efa97",
+      "id": "d80e178e-26db-4cf6-ab35-15222cee15e0",
       "name": "Splitter Fallback",
       "credentials": {
-        "groqApi": {
-          "id": "M7r8ohirlJtFA0vi",
+        "openRouterApi": {
+          "id": "FVYZaHIKcsth7Wm5",
           "name": "API KEY 1"
         }
       }
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "http://whatsapp-webhook/send",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "to",
-              "value": "=+{{ $json['Phone Number'] }}"
-            },
-            {
-              "name": "message",
-              "value": "={{ $('Analyst Agent').item.json.output.whatsapp_message }}"
-            }
-          ]
-        },
-        "options": {}
+        "model": "openai/gpt-oss-20b",
+        "options": {
+          "temperature": 0.1
+        }
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
       "position": [
-        2528,
-        608
+        -2272,
+        400
       ],
-      "id": "57693de0-6d7f-4407-9243-f8abeda45725",
-      "name": "Send Whatsapp Message",
-      "retryOnFail": true,
-      "waitBetweenTries": 3000
+      "id": "d42e8872-87ee-4194-8eaa-9a17715a4385",
+      "name": "Splitter Main",
+      "credentials": {
+        "groqApi": {
+          "id": "FkhyWZc9SiOUnDIJ",
+          "name": "API KEY 2"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -688,17 +714,6 @@
           {
             "node": "Splitter Agent",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Structured Output Parser": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "Analyst Agent",
-            "type": "ai_outputParser",
             "index": 0
           }
         ]
@@ -722,44 +737,11 @@
         ]
       ]
     },
-    "check_database_for_duplicates": {
-      "ai_tool": [
-        [
-          {
-            "node": "Analyst Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "scrape_application_page": {
-      "ai_tool": [
-        [
-          {
-            "node": "Analyst Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Message a model": {
-      "main": [
-        [
-          {
-            "node": "JSON Builder",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Analyst Agent": {
       "main": [
         [
           {
-            "node": "If",
+            "node": "Output Parser",
             "type": "main",
             "index": 0
           }
@@ -781,19 +763,8 @@
       "main": [
         [
           {
-            "node": "Analyst Agent",
+            "node": "Get HTML",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parser": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Structured Output Parser",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -804,11 +775,6 @@
         [
           {
             "node": "Append Valid",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Insert row",
             "type": "main",
             "index": 0
           }
@@ -833,34 +799,34 @@
         ]
       ]
     },
-    "serpapi_search": {
-      "ai_tool": [
-        [
-          {
-            "node": "Analyst Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Splitter Main": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Splitter Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Analyst Main": {
       "ai_languageModel": [
         [
           {
             "node": "Analyst Agent",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Whatsapp Message": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "serpapi_request": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analyst Agent",
+            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -877,6 +843,82 @@
         ]
       ]
     },
+    "Get HTML": {
+      "main": [
+        [
+          {
+            "node": "HTML Cleaner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Cleaner": {
+      "main": [
+        [
+          {
+            "node": "Analyst Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Rejected": {
+      "main": [
+        []
+      ]
+    },
+    "Append Valid": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        []
+      ]
+    },
+    "Output Parser": {
+      "main": [
+        [
+          {
+            "node": "Check for duplicate valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check_duplicate": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analyst Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for duplicate valid": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Splitter Fallback": {
       "ai_languageModel": [
         [
@@ -888,12 +930,12 @@
         ]
       ]
     },
-    "Send Whatsapp Message": {
-      "main": [
+    "Splitter Main": {
+      "ai_languageModel": [
         [
           {
-            "node": "Loop Over Items",
-            "type": "main",
+            "node": "Splitter Agent",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -907,9 +949,10 @@
     "saveExecutionProgress": true,
     "saveManualExecutions": false,
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "timezone": "Asia/Kolkata"
   },
-  "versionId": "6e9a07db-47cb-45a4-912f-b00d46f2c04e",
+  "versionId": "e6f6f035-f1ab-4d5b-a635-306b6c2c80c2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "19921415bac6b77b91e822c3e97165800ced3a4d6f63d204500fd50a2d359050"
