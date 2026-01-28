@@ -472,7 +472,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://140.245.29.28:3000/send",
+        "url": "http://YOUR_VM_IP:3000/send",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
