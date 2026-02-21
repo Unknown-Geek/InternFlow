@@ -440,7 +440,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://whatsapp.shravanpandala.me/send",
+        "url": "https://your-whatsapp-webhook/send",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
