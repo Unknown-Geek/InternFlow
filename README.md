@@ -1,6 +1,7 @@
 # InternFlow
+<img width="1355" height="1085" alt="Frame 1321321611" src="https://github.com/user-attachments/assets/1a298954-791b-49be-97d3-37ee52632d03" />
+<img width="1355" height="1085" alt="Frame 1321321612" src="https://github.com/user-attachments/assets/240b723c-9418-4e8a-a18a-15d08f9fc3c1" />
 
-InternFlow is an automation pipeline that monitors Telegram channels for internship opportunities and forwards qualifying postings to WhatsApp. It combines a Python-based Telegram forwarder with an n8n workflow that uses AI to parse, filter, and format postings.
 
 ## Features
 
